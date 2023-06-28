@@ -63,6 +63,7 @@ button {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-bottom: 5px;
 }
 #todo-container > div {
   display: flex;
