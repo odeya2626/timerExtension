@@ -1,9 +1,31 @@
 let todos = [];
 const addTodoBtn = document.getElementById("add-btn");
-const todoContainer = document.getElementById("todo-container");
 addTodoBtn.addEventListener("click", () => {
   addTodo();
 });
+
+const startBtn = document.getElementById("start-btn");
+startBtn.addEventListener("click", () => {
+  chrome.storage.local.get(["isRunning"], (data) => {
+    chrome.storage.local.set(
+      {
+        isRunning: !data.isRunning,
+      },
+      () => {
+        startBtn.textContent = !data.isRunning ? "Stop" : "Start";
+      }
+    );
+  });
+});
+
+const resetBtn = document.getElementById("reset-btn");
+resetBtn.addEventListener("click", () => {
+  chrome.storage.local.set({ timer: 0, isRunning: false }, () => {
+    startBtn.textContent = "Start";
+  });
+});
+
+const todoContainer = document.getElementById("todo-container");
 
 chrome.storage.sync.get(["todos"], (data) => {
   todos = data.todos ? data.todos : [];
@@ -49,9 +71,34 @@ const renderTodo = (todoNum) => {
   deleteBtn.className = "material-icons delete";
   deleteBtn.innerText = "delete";
   deleteBtn.addEventListener("click", () => {
-    deleteTodo();
+    deleteTodo(todoNum);
   });
   todoRow.appendChild(text);
   todoRow.appendChild(deleteBtn);
   todoContainer.appendChild(todoRow);
 };
+
+const updateTime = () => {
+  chrome.storage.local.get(["timer", "breakTime"], (data) => {
+    const time = document.getElementById("time");
+    const timeVal = data.timer;
+    const timeForTodo = data.breakTime;
+    let hours = `${Math.floor(
+      timeForTodo / 60 - Math.ceil(timeVal / 3600)
+    )}`.padStart(2, "0");
+    if (hours < 0) {
+      hours = "00";
+    }
+
+    let minutes = `${timeForTodo - Math.ceil(timeVal / 60)}`.padStart(2, "0");
+    minutes === "60" && (minutes = "00");
+    minutes < 0 && (minutes = "00");
+    const seconds = `${
+      timeVal % 60 !== 0 ? 60 - (timeVal % 60) : "00"
+    }`.padStart(2, "0");
+    time.textContent = `${hours}:${minutes}:${seconds}`;
+  });
+};
+
+updateTime();
+setInterval(updateTime, 1000);
