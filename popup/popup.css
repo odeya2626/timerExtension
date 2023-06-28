@@ -31,8 +31,8 @@ button {
 }
 #main-container {
   background-color: #d5cbee;
-  width: 100%;
-  height: 100%;
+  padding: 0;
+  margin: 0;
 }
 .header {
   padding: 10px;
